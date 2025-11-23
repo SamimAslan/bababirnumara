@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
-import { Plane } from 'lucide-react';
+import { Compass, Globe, Check } from 'lucide-react';
 
 const RegisterPage: React.FC = () => {
   const [name, setName] = useState('');
@@ -48,7 +48,7 @@ const RegisterPage: React.FC = () => {
 
   return (
     <div className="flex min-h-screen w-full bg-[#F3F4F6]">
-      <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-8 lg:p-16">
+      <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-8 lg:p-16 bg-white md:bg-transparent">
         <div className="w-full max-w-md space-y-8">
           <div className="text-center md:text-left">
             <h2 className="text-3xl font-extrabold text-[#111827]">
@@ -126,18 +126,29 @@ const RegisterPage: React.FC = () => {
       </div>
 
       <div className="hidden md:flex md:w-1/2 bg-[#2F34A2] flex-col justify-center items-center text-white relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
-             <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="w-full h-full">
-               <path d="M0 100 C 20 0 50 0 100 100 Z" fill="white" />
-             </svg>
-        </div>
-
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-[#2F34A2] to-[#1a1d63] z-0"></div>
+        
         <div className="relative z-10 flex flex-col items-center">
-            <div className="bg-white/10 p-6 rounded-full mb-6 backdrop-blur-sm">
-                <Plane size={64} className="text-white" />
+            <div className="flex items-center justify-center mb-12 select-none">
+                <span className="text-6xl font-bold tracking-tight">N</span>
+                <Compass className="w-14 h-14 text-[#409F68] mx-1 animate-[spin_10s_linear_infinite]" strokeWidth={2.5} />
+                <span className="text-6xl font-bold tracking-tight">madG</span>
+                <Globe className="w-14 h-14 text-[#409F68] ml-1" strokeWidth={2.5} />
             </div>
-            <h1 className="text-5xl font-bold tracking-tight mb-2">NomadGo</h1>
-            <p className="text-blue-100 text-lg">Your next adventure awaits.</p>
+
+            <p className="text-blue-100 text-xl font-medium mb-16 text-center px-8">
+              Your next adventure awaits.
+            </p>
+
+            <div className="bg-white/10 backdrop-blur-md border border-white/20 p-5 rounded-2xl shadow-2xl flex items-center gap-4 max-w-sm transform -rotate-3 hover:rotate-0 transition-transform duration-500 cursor-default">
+              <div className="bg-[#409F68] rounded-full p-2 shadow-lg">
+                <Check className="w-6 h-6 text-white" strokeWidth={3} />
+              </div>
+              <div>
+                <h3 className="font-bold text-lg text-white">Flight Booked!</h3>
+                <p className="text-blue-100 text-sm">Bali, Indonesia • 1 Traveler</p>
+              </div>
+            </div>
         </div>
       </div>
     </div>
