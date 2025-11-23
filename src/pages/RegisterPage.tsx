@@ -5,13 +5,15 @@ import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { Plane } from 'lucide-react';
 
-const LoginPage: React.FC = () => {
+const RegisterPage: React.FC = () => {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
-  const login = useAuthStore((state) => state.login);
+  const register = useAuthStore((state) => state.register);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -20,7 +22,7 @@ const LoginPage: React.FC = () => {
     setIsLoading(true);
 
     setTimeout(() => {
-      if (!email || !password) {
+      if (!name || !email || !password || !confirmPassword) {
         setError('Please fill in all fields.');
         setIsLoading(false);
         return;
@@ -32,7 +34,13 @@ const LoginPage: React.FC = () => {
         return;
       }
 
-      login(email);
+      if (password !== confirmPassword) {
+        setError('Passwords do not match.');
+        setIsLoading(false);
+        return;
+      }
+
+      register(email, name);
       setIsLoading(false);
       navigate('/dashboard');
     }, 1000);
@@ -44,15 +52,24 @@ const LoginPage: React.FC = () => {
         <div className="w-full max-w-md space-y-8">
           <div className="text-center md:text-left">
             <h2 className="text-3xl font-extrabold text-[#111827]">
-              Welcome Back
+              Create Account
             </h2>
             <p className="mt-2 text-sm text-gray-600">
-              Please sign in to continue your journey.
+              Join us and start your journey today.
             </p>
           </div>
 
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-4">
+              <Input
+                id="name"
+                type="text"
+                label="Full Name"
+                placeholder="John Doe"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+
               <Input
                 id="email"
                 type="email"
@@ -60,7 +77,6 @@ const LoginPage: React.FC = () => {
                 placeholder="nomad@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                error={error && !email ? 'Email is required' : ''}
               />
               
               <Input
@@ -70,6 +86,16 @@ const LoginPage: React.FC = () => {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+              />
+
+              <Input
+                id="confirm-password"
+                type="password"
+                label="Confirm Password"
+                placeholder="••••••••"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                error={error && password !== confirmPassword ? 'Passwords do not match' : ''}
               />
             </div>
 
@@ -83,37 +109,17 @@ const LoginPage: React.FC = () => {
               </div>
             )}
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="h-4 w-4 text-[#2F34A2] focus:ring-[#2F34A2] border-gray-300 rounded"
-                />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-                  Remember me
-                </label>
-              </div>
-
-              <div className="text-sm">
-                <a href="#" className="font-medium text-[#2F34A2] hover:text-[#262a85]">
-                  Forgot your password?
-                </a>
-              </div>
-            </div>
-
             <div>
               <Button type="submit" isLoading={isLoading}>
-                Sign In
+                Sign Up
               </Button>
             </div>
           </form>
           
           <div className="mt-6 text-center text-sm text-gray-500">
-            Don't have an account?{' '}
-            <Link to="/register" className="font-medium text-[#2F34A2] hover:text-[#262a85]">
-              Create an account
+            Already have an account?{' '}
+            <Link to="/" className="font-medium text-[#2F34A2] hover:text-[#262a85]">
+              Sign In
             </Link>
           </div>
         </div>
@@ -131,11 +137,11 @@ const LoginPage: React.FC = () => {
                 <Plane size={64} className="text-white" />
             </div>
             <h1 className="text-5xl font-bold tracking-tight mb-2">NomadGo</h1>
-            <p className="text-blue-100 text-lg">Explore the world, one click at a time.</p>
+            <p className="text-blue-100 text-lg">Your next adventure awaits.</p>
         </div>
       </div>
     </div>
   );
 };
 
-export default LoginPage;
+export default RegisterPage;

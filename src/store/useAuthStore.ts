@@ -14,6 +14,16 @@ export const useAuthStore = create<AuthState>((set) => ({
       },
     });
   },
+  register: (email: string, name: string) => {
+    set({
+      isAuthenticated: true,
+      user: {
+        id: Date.now().toString(),
+        email: email,
+        name: name,
+      },
+    });
+  },
   logout: () => {
     set({
       isAuthenticated: false,
