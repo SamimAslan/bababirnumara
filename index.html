@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NomadGo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: '#2F34A2',
+              secondary: '#409F68',
+              background: '#F3F4F6',
+              error: '#A22F2F',
+              text: '#111827',
+            }
+          }
+        }
+      }
+    </script>
+  <script type="importmap">
+</script>
+</head>
+  <body class="bg-background text-text antialiased">
+    <div id="root"></div>
+    <script type="module" src="/src/index.tsx"></script>
+  </body>
+</html>

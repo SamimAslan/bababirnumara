@@ -1,0 +1,5 @@
+{
+  "name": "NomadGo",
+  "description": "A modern travel booking application with a clean, split-screen login interface.",
+  "requestFramePermissions": []
+}
