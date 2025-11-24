@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Navbar } from "../components/Navbar";
+import { useCurrencyStore } from "../store/useCurrencyStore";
 import {
   ChevronDown,
   Calendar,
   MapPin,
   X,
-  Check,
   ArrowRight,
   Shield,
   Zap,
@@ -39,6 +39,7 @@ const carouselSlides = [
 const LandingPage: React.FC = () => {
   const [fromCity, setFromCity] = useState("Zürich");
   const [currentSlide, setCurrentSlide] = useState(0);
+  const { convertPrice } = useCurrencyStore();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -243,10 +244,10 @@ const LandingPage: React.FC = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
-            { city: "London", price: "CHF 45", country: "United Kingdom" },
-            { city: "Paris", price: "CHF 52", country: "France" },
-            { city: "Berlin", price: "CHF 60", country: "Germany" },
-            { city: "Barcelona", price: "CHF 75", country: "Spain" },
+            { city: "London", priceCHF: 45, country: "United Kingdom" },
+            { city: "Paris", priceCHF: 52, country: "France" },
+            { city: "Berlin", priceCHF: 60, country: "Germany" },
+            { city: "Barcelona", priceCHF: 75, country: "Spain" },
           ].map((dest, idx) => (
             <div
               key={idx}
@@ -269,7 +270,7 @@ const LandingPage: React.FC = () => {
                   {dest.city}
                 </span>
                 <span className="absolute bottom-4 right-4 bg-[#409F68] text-white text-xs font-bold px-2 py-1 rounded z-20">
-                  {dest.price}
+                  {convertPrice(dest.priceCHF)}
                 </span>
               </div>
               <div className="p-4">
