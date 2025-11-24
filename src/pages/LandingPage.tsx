@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
+import { NomadModal } from "../components/NomadModal";
 import { useCurrencyStore } from "../store/useCurrencyStore";
+import type { NomadFormState } from "../types";
 import {
   ChevronDown,
   Calendar,
@@ -66,6 +68,14 @@ const LandingPage: React.FC = () => {
     infants: 0,
   });
 
+  const [isNomadModalOpen, setIsNomadModalOpen] = useState(false);
+  const [nomadForm, setNomadForm] = useState<NomadFormState>({
+    dest1: "",
+    dest2: "",
+    isReturnDifferent: false,
+    endCity: "Zürich",
+  });
+
   const passengerDropdownRef = useRef<HTMLDivElement>(null);
   const tripTypeDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -119,8 +129,17 @@ const LandingPage: React.FC = () => {
     });
   };
 
+  const handleExplore = () => {
+    if (tripType === "Nomad") {
+      setIsNomadModalOpen(true);
+      setNomadForm((prev) => ({ ...prev, endCity: fromCity }));
+    } else {
+      console.log("Searching...");
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-[#F3F4F6] flex flex-col">
+    <div className="min-h-screen bg-[#F3F4F6] flex flex-col relative">
       <Navbar />
 
       <div className="flex-grow">
@@ -413,7 +432,10 @@ const LandingPage: React.FC = () => {
                   </div>
 
                   <div className="md:col-span-2">
-                    <button className="w-full h-14 bg-[#409F68] hover:bg-[#368f5b] text-white font-bold rounded-b-lg md:rounded-r-lg md:rounded-bl-none flex items-center justify-center gap-2 transition-colors">
+                    <button
+                      onClick={handleExplore}
+                      className="w-full h-14 bg-[#409F68] hover:bg-[#368f5b] text-white font-bold rounded-b-lg md:rounded-r-lg md:rounded-bl-none flex items-center justify-center gap-2 transition-colors"
+                    >
                       Explore <ArrowRight className="w-5 h-5" />
                     </button>
                   </div>
@@ -572,6 +594,14 @@ const LandingPage: React.FC = () => {
       </div>
 
       <Footer />
+
+      <NomadModal
+        isOpen={isNomadModalOpen}
+        onClose={() => setIsNomadModalOpen(false)}
+        form={nomadForm}
+        setForm={setNomadForm}
+        fromCity={fromCity}
+      />
     </div>
   );
 };
