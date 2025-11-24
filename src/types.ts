@@ -20,3 +20,10 @@ export interface CurrencyState {
   fetchRates: () => Promise<void>;
   convertPrice: (amountInCHF: number) => string;
 }
+
+export interface NomadFormState {
+  dest1: string;
+  dest2: string;
+  isReturnDifferent: boolean;
+  endCity: string;
+}
