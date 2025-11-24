@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
 import { useCurrencyStore } from "../store/useCurrencyStore";
@@ -11,6 +11,11 @@ import {
   Shield,
   Zap,
   Percent,
+  Plus,
+  Minus,
+  User,
+  Baby,
+  Smile,
 } from "lucide-react";
 
 const carouselSlides = [
@@ -37,18 +42,82 @@ const carouselSlides = [
   },
 ];
 
+interface PassengerConfig {
+  adults: number;
+  children: number;
+  infants: number;
+}
+
 const LandingPage: React.FC = () => {
   const [fromCity, setFromCity] = useState("Zürich");
+  const [toCity, setToCity] = useState("");
   const [currentSlide, setCurrentSlide] = useState(0);
   const { convertPrice } = useCurrencyStore();
+
+  const [departureDate, setDepartureDate] = useState("");
+  const [returnDate, setReturnDate] = useState("");
+  const [tripType, setTripType] = useState("Return");
+  const [isTripTypeOpen, setIsTripTypeOpen] = useState(false);
+
+  const [isPassengerOpen, setIsPassengerOpen] = useState(false);
+  const [passengers, setPassengers] = useState<PassengerConfig>({
+    adults: 1,
+    children: 0,
+    infants: 0,
+  });
+
+  const passengerDropdownRef = useRef<HTMLDivElement>(null);
+  const tripTypeDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % carouselSlides.length);
     }, 2000);
 
-    return () => clearInterval(timer);
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        passengerDropdownRef.current &&
+        !passengerDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsPassengerOpen(false);
+      }
+      if (
+        tripTypeDropdownRef.current &&
+        !tripTypeDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsTripTypeOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
+
+  const updatePassenger = (key: keyof PassengerConfig, delta: number) => {
+    setPassengers((prev) => {
+      const newValue = prev[key] + delta;
+      if (newValue < 0) return prev;
+      if (key === "adults" && newValue < 1) return prev;
+      return { ...prev, [key]: newValue };
+    });
+  };
+
+  const totalPassengers =
+    passengers.adults + passengers.children + passengers.infants;
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "Anytime";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  };
 
   return (
     <div className="min-h-screen bg-[#F3F4F6] flex flex-col">
@@ -60,26 +129,180 @@ const LandingPage: React.FC = () => {
             <h1 className="text-3xl md:text-4xl font-bold text-center text-[#111827] mb-8">
               Fly for less, Guaranteed!
             </h1>
-            <div className="bg-white rounded-xl shadow-xl p-1 max-w-5xl mx-auto">
+            <div className="bg-white rounded-xl shadow-xl p-1 max-w-5xl mx-auto relative z-20">
               <div className="p-4 space-y-4">
                 <div className="flex flex-wrap gap-2 md:gap-4 mb-2">
-                  <button className="flex items-center gap-1 px-3 py-1.5 hover:bg-gray-100 rounded text-sm font-medium text-gray-700">
-                    Return <ChevronDown className="w-4 h-4 text-gray-400" />
-                  </button>
-                  <button className="flex items-center gap-1 px-3 py-1.5 hover:bg-gray-100 rounded text-sm font-medium text-gray-700">
-                    Economy <ChevronDown className="w-4 h-4 text-gray-400" />
-                  </button>
-                  <button className="flex items-center gap-1 px-3 py-1.5 hover:bg-gray-100 rounded text-sm font-medium text-gray-700">
-                    1 Passenger{" "}
-                    <ChevronDown className="w-4 h-4 text-gray-400" />
-                  </button>
-                  <button className="flex items-center gap-1 px-3 py-1.5 hover:bg-gray-100 rounded text-sm font-medium text-gray-700">
-                    0 Bags <ChevronDown className="w-4 h-4 text-gray-400" />
-                  </button>
+                  <div className="relative" ref={tripTypeDropdownRef}>
+                    <button
+                      onClick={() => setIsTripTypeOpen(!isTripTypeOpen)}
+                      className="flex items-center gap-1 px-3 py-1.5 hover:bg-gray-100 rounded text-sm font-medium text-gray-700 transition-colors"
+                    >
+                      {tripType}{" "}
+                      <ChevronDown className="w-4 h-4 text-gray-400" />
+                    </button>
+                    {isTripTypeOpen && (
+                      <div className="absolute top-full left-0 mt-1 w-32 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50">
+                        {["Return", "One-way", "Nomad"].map((type) => (
+                          <button
+                            key={type}
+                            onClick={() => {
+                              setTripType(type);
+                              setIsTripTypeOpen(false);
+                            }}
+                            className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${
+                              tripType === type
+                                ? "text-[#2F34A2] font-semibold"
+                                : "text-gray-700"
+                            }`}
+                          >
+                            {type}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="relative" ref={passengerDropdownRef}>
+                    <button
+                      onClick={() => setIsPassengerOpen(!isPassengerOpen)}
+                      className="flex items-center gap-1 px-3 py-1.5 hover:bg-gray-100 rounded text-sm font-medium text-gray-700 transition-colors"
+                    >
+                      {totalPassengers} Passenger
+                      {totalPassengers !== 1 ? "s" : ""}
+                      <ChevronDown className="w-4 h-4 text-gray-400" />
+                    </button>
+
+                    {isPassengerOpen && (
+                      <div className="absolute top-full left-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-100 p-4 z-50 animate-in fade-in zoom-in-95 duration-100">
+                        <div className="mb-4">
+                          <h4 className="text-sm font-bold text-gray-900 mb-3">
+                            Passengers
+                          </h4>
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <User className="w-5 h-5 text-gray-400" />
+                                <div>
+                                  <p className="text-sm font-medium text-gray-900">
+                                    Adults
+                                  </p>
+                                  <p className="text-xs text-gray-500">
+                                    Over 11
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <button
+                                  onClick={() => updatePassenger("adults", -1)}
+                                  className="p-1 rounded-full hover:bg-gray-100 text-gray-500 disabled:opacity-30"
+                                  disabled={passengers.adults <= 1}
+                                >
+                                  <Minus className="w-4 h-4" />
+                                </button>
+                                <span className="text-sm font-medium w-4 text-center">
+                                  {passengers.adults}
+                                </span>
+                                <button
+                                  onClick={() => updatePassenger("adults", 1)}
+                                  className="p-1 rounded-full hover:bg-gray-100 text-[#2F34A2]"
+                                >
+                                  <Plus className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <Smile className="w-5 h-5 text-gray-400" />
+                                <div>
+                                  <p className="text-sm font-medium text-gray-900">
+                                    Children
+                                  </p>
+                                  <p className="text-xs text-gray-500">
+                                    2 – 11
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <button
+                                  onClick={() =>
+                                    updatePassenger("children", -1)
+                                  }
+                                  className="p-1 rounded-full hover:bg-gray-100 text-gray-500 disabled:opacity-30"
+                                  disabled={passengers.children <= 0}
+                                >
+                                  <Minus className="w-4 h-4" />
+                                </button>
+                                <span className="text-sm font-medium w-4 text-center">
+                                  {passengers.children}
+                                </span>
+                                <button
+                                  onClick={() => updatePassenger("children", 1)}
+                                  className="p-1 rounded-full hover:bg-gray-100 text-[#2F34A2]"
+                                >
+                                  <Plus className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <Baby className="w-5 h-5 text-gray-400" />
+                                <div>
+                                  <p className="text-sm font-medium text-gray-900">
+                                    Infants
+                                  </p>
+                                  <p className="text-xs text-gray-500">
+                                    Under 2
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <button
+                                  onClick={() => updatePassenger("infants", -1)}
+                                  className="p-1 rounded-full hover:bg-gray-100 text-gray-500 disabled:opacity-30"
+                                  disabled={passengers.infants <= 0}
+                                >
+                                  <Minus className="w-4 h-4" />
+                                </button>
+                                <span className="text-sm font-medium w-4 text-center">
+                                  {passengers.infants}
+                                </span>
+                                <button
+                                  onClick={() => updatePassenger("infants", 1)}
+                                  className="p-1 rounded-full hover:bg-gray-100 text-[#2F34A2]"
+                                >
+                                  <Plus className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="mt-6 border-t border-gray-100 pt-4">
+                          <button
+                            onClick={() => setIsPassengerOpen(false)}
+                            className="w-full bg-[#2F34A2] text-white font-semibold py-2 rounded-lg hover:bg-[#262a85] transition-colors"
+                          >
+                            Done
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-1 md:gap-0 bg-gray-100/50 p-1 md:bg-transparent rounded-lg md:rounded-none">
-                  <div className="md:col-span-3 relative group">
-                    <div className="flex items-center bg-white border border-gray-300 rounded-t-lg md:rounded-l-lg md:rounded-tr-none p-3 h-14 hover:border-gray-400 transition-colors cursor-text">
+                  <div
+                    className={`${
+                      tripType === "Nomad" ? "md:col-span-6" : "md:col-span-3"
+                    } relative group`}
+                  >
+                    <div
+                      className={`flex items-center bg-white border border-gray-300 rounded-t-lg md:rounded-l-lg ${
+                        tripType === "Nomad" ? "" : "md:rounded-tr-none"
+                      } p-3 h-14 hover:border-gray-400 transition-colors cursor-text`}
+                    >
                       <div className="flex items-center gap-2 w-full overflow-hidden">
                         <MapPin className="w-5 h-5 text-gray-400 flex-shrink-0" />
                         <div className="flex items-center gap-1 bg-green-100 text-[#2F34A2] px-2 py-0.5 rounded-full text-sm font-medium whitespace-nowrap">
@@ -95,53 +318,107 @@ const LandingPage: React.FC = () => {
                           <input
                             className="outline-none text-gray-900 w-full"
                             placeholder="From?"
+                            value={fromCity}
+                            onChange={(e) => setFromCity(e.target.value)}
                           />
                         )}
                       </div>
                     </div>
                   </div>
-                  <div className="md:col-span-3 relative">
-                    <div className="flex items-center bg-white border-x-0 md:border-l-0 border-t-0 border-b md:border-y border-gray-300 p-3 h-14 hover:border-gray-400 hover:z-10 transition-colors cursor-text">
-                      <MapPin className="w-5 h-5 text-gray-400 flex-shrink-0 mr-2" />
-                      <input
-                        type="text"
-                        placeholder="City, airport or place"
-                        className="w-full outline-none text-gray-900 placeholder-gray-500 font-medium"
-                      />
+
+                  {tripType !== "Nomad" && (
+                    <div className="md:col-span-3 relative">
+                      <div className="flex items-center bg-white border-x-0 md:border-l-0 border-t-0 border-b md:border-y border-gray-300 p-3 h-14 hover:border-gray-400 hover:z-10 transition-colors cursor-text">
+                        <MapPin className="w-5 h-5 text-gray-400 flex-shrink-0 mr-2" />
+                        <input
+                          type="text"
+                          placeholder="City, airport or place"
+                          className="w-full outline-none text-gray-900 placeholder-gray-500 font-medium"
+                          value={toCity}
+                          onChange={(e) => setToCity(e.target.value)}
+                        />
+                      </div>
                     </div>
-                  </div>
+                  )}
+
                   <div className="md:col-span-2 relative">
-                    <div className="flex items-center bg-white border border-gray-300 md:border-l-0 border-b-0 md:border-b p-3 h-14 hover:border-gray-400 hover:z-10 transition-colors cursor-pointer">
+                    <div className="flex items-center bg-white border border-gray-300 md:border-l-0 border-b-0 md:border-b p-3 h-14 hover:border-gray-400 hover:z-10 transition-colors cursor-pointer relative">
+                      <input
+                        type="date"
+                        className="absolute inset-0 opacity-0 z-10 cursor-pointer w-full h-full"
+                        value={departureDate}
+                        onChange={(e) => setDepartureDate(e.target.value)}
+                        onClick={(e) => {
+                          try {
+                            if ("showPicker" in HTMLInputElement.prototype) {
+                              e.currentTarget.showPicker();
+                            }
+                          } catch (err) {}
+                        }}
+                      />
                       <Calendar className="w-5 h-5 text-gray-400 flex-shrink-0 mr-2" />
                       <div className="flex flex-col justify-center">
                         <span className="text-xs text-gray-500 font-medium">
                           Departure
                         </span>
-                        <span className="text-sm text-gray-900 font-bold">
-                          Anytime
+                        <span
+                          className={`text-sm font-bold ${
+                            departureDate ? "text-[#111827]" : "text-gray-900"
+                          }`}
+                        >
+                          {formatDate(departureDate)}
                         </span>
                       </div>
                     </div>
                   </div>
+
                   <div className="md:col-span-2 relative">
-                    <div className="flex items-center bg-white border border-gray-300 md:border-l-0 border-b md:border-r-0 p-3 h-14 hover:border-gray-400 hover:z-10 transition-colors cursor-pointer">
+                    <div className="flex items-center bg-white border border-gray-300 md:border-l-0 border-b md:border-r-0 p-3 h-14 hover:border-gray-400 hover:z-10 transition-colors cursor-pointer relative">
+                      {tripType !== "One-way" && (
+                        <input
+                          type="date"
+                          className="absolute inset-0 opacity-0 z-10 cursor-pointer w-full h-full"
+                          value={returnDate}
+                          onChange={(e) => setReturnDate(e.target.value)}
+                          min={departureDate}
+                          onClick={(e) => {
+                            try {
+                              if ("showPicker" in HTMLInputElement.prototype) {
+                                e.currentTarget.showPicker();
+                              }
+                            } catch (err) {}
+                          }}
+                        />
+                      )}
                       <Calendar className="w-5 h-5 text-gray-400 flex-shrink-0 mr-2" />
                       <div className="flex flex-col justify-center">
                         <span className="text-xs text-gray-500 font-medium">
                           Return
                         </span>
-                        <span className="text-sm text-gray-900 font-bold">
-                          Anytime
+                        <span
+                          className={`text-sm font-bold ${
+                            returnDate
+                              ? "text-[#111827]"
+                              : tripType === "One-way"
+                              ? "text-gray-400"
+                              : "text-gray-900"
+                          }`}
+                        >
+                          {tripType === "One-way"
+                            ? "No Return"
+                            : formatDate(returnDate)}
                         </span>
                       </div>
                     </div>
                   </div>
+
                   <div className="md:col-span-2">
                     <button className="w-full h-14 bg-[#409F68] hover:bg-[#368f5b] text-white font-bold rounded-b-lg md:rounded-r-lg md:rounded-bl-none flex items-center justify-center gap-2 transition-colors">
                       Explore <ArrowRight className="w-5 h-5" />
                     </button>
                   </div>
                 </div>
+
                 <div className="flex items-center gap-2 mt-2">
                   <div className="flex items-center h-5">
                     <input
@@ -173,6 +450,7 @@ const LandingPage: React.FC = () => {
             </div>
           </div>
         </div>
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12 relative z-10 pb-16">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="rounded-2xl overflow-hidden bg-gradient-to-r from-purple-700 to-purple-500 shadow-lg text-white relative">
@@ -241,6 +519,7 @@ const LandingPage: React.FC = () => {
             </div>
           </div>
         </div>
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
           <h2 className="text-2xl font-bold text-[#111827] mb-6">
             Popular destinations from Zürich
