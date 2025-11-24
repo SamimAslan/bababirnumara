@@ -11,3 +11,12 @@ export interface AuthState {
   register: (email: string, name: string) => void;
   logout: () => void;
 }
+
+export interface CurrencyState {
+  currency: string;
+  rates: Record<string, number>;
+  isLoading: boolean;
+  setCurrency: (currency: string) => void;
+  fetchRates: () => Promise<void>;
+  convertPrice: (amountInCHF: number) => string;
+}
