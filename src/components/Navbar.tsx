@@ -1,17 +1,19 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  Compass,
   Globe,
   Menu,
   HelpCircle,
   Ticket,
   Loader2,
   ChevronDown,
+  Info,
+  Mail,
 } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useCurrencyStore } from "../store/useCurrencyStore";
 import { Button } from "./Button";
+import logo from "../assets/logo.png";
 
 export const Navbar: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuthStore();
@@ -53,38 +55,34 @@ export const Navbar: React.FC = () => {
 
   return (
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16 items-center">
-          <div className="flex items-center gap-8">
-            <Link
-              to="/"
-              className="flex items-center gap-0.5 group select-none"
-            >
-              <span className="text-3xl font-bold text-[#1e2265] tracking-tighter">
-                N
-              </span>
-              <div className="relative flex items-center justify-center w-8 h-8">
-                <Compass
-                  className="w-8 h-8 text-[#409F68] animate-[spin_10s_linear_infinite]"
-                  strokeWidth={2}
-                />
-              </div>
-              <span className="text-3xl font-bold text-[#1e2265] tracking-tighter">
-                madG
-              </span>
-              <Globe
-                className="w-8 h-8 text-[#409F68] ml-0.5"
-                strokeWidth={2}
-              />
+      <div className="w-full px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-24 items-center">
+          <div className="flex items-center gap-4">
+            <Link to="/" className="flex items-center">
+              <img src={logo} alt="NomadGo" className="h-8 w-auto md:h-10" />
             </Link>
 
-            <div className="hidden md:flex items-center space-x-6 text-sm font-medium text-gray-600">
+            <div className="hidden md:flex items-center space-x-2 text-sm font-medium text-gray-600">
               <Link
                 to="/tickets"
                 className="flex items-center gap-2 text-[#2F34A2] hover:bg-gray-50 px-3 py-2 rounded-md transition-colors"
               >
                 <Ticket className="w-4 h-4" />
                 My Tickets
+              </Link>
+              <Link
+                to="/about"
+                className="flex items-center gap-2 text-gray-600 hover:text-[#2F34A2] hover:bg-gray-50 px-3 py-2 rounded-md transition-colors"
+              >
+                <Info className="w-4 h-4" />
+                About Us
+              </Link>
+              <Link
+                to="/contact"
+                className="flex items-center gap-2 text-gray-600 hover:text-[#2F34A2] hover:bg-gray-50 px-3 py-2 rounded-md transition-colors"
+              >
+                <Mail className="w-4 h-4" />
+                Contact
               </Link>
             </div>
           </div>
