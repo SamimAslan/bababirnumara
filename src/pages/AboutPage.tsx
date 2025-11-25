@@ -13,7 +13,7 @@ const teamMembers = [
     name: "Yavuz Özbay",
     role: "Head of Product",
     image: "",
-  }
+  },
 ];
 
 const AboutPage: React.FC = () => {
@@ -45,27 +45,41 @@ const AboutPage: React.FC = () => {
                 Our Mission
               </h2>
               <p className="text-gray-600 text-lg leading-relaxed mb-8">
-                The travel industry was built on legacy systems and cluttered interfaces. 
-                We believe in a different approach. One where the journey begins 
-                the moment you decide to go, not when you arrive.
+                The travel industry was built on legacy systems and cluttered
+                interfaces. We believe in a different approach. One where the
+                journey begins the moment you decide to go, not when you arrive.
               </p>
               <p className="text-gray-600 text-lg leading-relaxed">
-                By stripping away the non-essential, we focus purely on what matters: 
-                getting you there with style, speed, and absolute confidence.
+                By stripping away the non-essential, we focus purely on what
+                matters: getting you there with style, speed, and absolute
+                confidence.
               </p>
             </div>
             <div className="space-y-12">
               <div className="group">
-                <h3 className="text-xl font-bold mb-2 group-hover:text-[#2F34A2] transition-colors">Precision</h3>
-                <p className="text-gray-500">Every pixel, every route, every calculation is optimized for accuracy.</p>
+                <h3 className="text-xl font-bold mb-2 group-hover:text-[#2F34A2] transition-colors">
+                  Precision
+                </h3>
+                <p className="text-gray-500">
+                  Every pixel, every route, every calculation is optimized for
+                  accuracy.
+                </p>
               </div>
               <div className="group">
-                <h3 className="text-xl font-bold mb-2 group-hover:text-[#2F34A2] transition-colors">Global Reach</h3>
-                <p className="text-gray-500">Connecting over 150 countries with a unified booking standard.</p>
+                <h3 className="text-xl font-bold mb-2 group-hover:text-[#2F34A2] transition-colors">
+                  Global Reach
+                </h3>
+                <p className="text-gray-500">
+                  Connecting over 150 countries with a unified booking standard.
+                </p>
               </div>
               <div className="group">
-                <h3 className="text-xl font-bold mb-2 group-hover:text-[#2F34A2] transition-colors">Transparency</h3>
-                <p className="text-gray-500">No hidden fees. No dark patterns. Just honest travel.</p>
+                <h3 className="text-xl font-bold mb-2 group-hover:text-[#2F34A2] transition-colors">
+                  Transparency
+                </h3>
+                <p className="text-gray-500">
+                  No hidden fees. No dark patterns. Just honest travel.
+                </p>
               </div>
             </div>
           </div>
@@ -74,19 +88,27 @@ const AboutPage: React.FC = () => {
           <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-12">
             <div className="border-l border-[#2F34A2] pl-6">
               <div className="text-5xl font-bold mb-2">100%</div>
-              <div className="text-gray-400 text-sm tracking-widest uppercase">Secure</div>
+              <div className="text-gray-400 text-sm tracking-widest uppercase">
+                Secure
+              </div>
             </div>
             <div className="border-l border-[#2F34A2] pl-6">
               <div className="text-5xl font-bold mb-2">150+</div>
-              <div className="text-gray-400 text-sm tracking-widest uppercase">Countries</div>
+              <div className="text-gray-400 text-sm tracking-widest uppercase">
+                Countries
+              </div>
             </div>
             <div className="border-l border-[#2F34A2] pl-6">
               <div className="text-5xl font-bold mb-2">24/7</div>
-              <div className="text-gray-400 text-sm tracking-widest uppercase">Support</div>
+              <div className="text-gray-400 text-sm tracking-widest uppercase">
+                Support
+              </div>
             </div>
             <div className="border-l border-[#2F34A2] pl-6">
               <div className="text-5xl font-bold mb-2">TOP</div>
-              <div className="text-gray-400 text-sm tracking-widest uppercase">Quality</div>
+              <div className="text-gray-400 text-sm tracking-widest uppercase">
+                Quality
+              </div>
             </div>
           </div>
         </section>
@@ -111,8 +133,12 @@ const AboutPage: React.FC = () => {
                     />
                     <div className="absolute inset-0 border border-black/5 pointer-events-none"></div>
                   </div>
-                  <h3 className="text-xl font-bold text-black mb-1">{member.name}</h3>
-                  <p className="text-sm text-gray-500 font-medium tracking-wide uppercase">{member.role}</p>
+                  <h3 className="text-xl font-bold text-black mb-1">
+                    {member.name}
+                  </h3>
+                  <p className="text-sm text-gray-500 font-medium tracking-wide uppercase">
+                    {member.role}
+                  </p>
                 </div>
               ))}
             </div>
