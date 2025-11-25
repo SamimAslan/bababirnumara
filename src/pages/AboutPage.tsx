@@ -1,13 +1,14 @@
 import React from "react";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
-import { ArrowRight, Target, Users, Globe2 } from "lucide-react";
+import { ArrowRight, Target, Users} from "lucide-react";
+import yasinImg from "../assets/yasin.jpeg";
 
 const teamMembers = [
   {
     name: "Yasin Kereci",
     role: "Founder & CEO",
-    image: "",
+    image: yasinImg,
   },
   {
     name: "Yavuz Özbay",
