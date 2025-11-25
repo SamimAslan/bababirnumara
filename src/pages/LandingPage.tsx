@@ -3,12 +3,12 @@ import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
 import { NomadModal } from "../components/NomadModal";
 import { useCurrencyStore } from "../store/useCurrencyStore";
+import { CityAutocomplete } from "../components/CityAutoComplete";
 import type { NomadFormState } from "../types";
 import {
   ChevronDown,
   Calendar,
   MapPin,
-  X,
   ArrowRight,
   Shield,
   Zap,
@@ -322,25 +322,13 @@ const LandingPage: React.FC = () => {
                         tripType === "Nomad" ? "" : "md:rounded-tr-none"
                       } p-3 h-14 hover:border-gray-400 transition-colors cursor-text`}
                     >
-                      <div className="flex items-center gap-2 w-full overflow-hidden">
+                      <div className="flex items-center gap-2 w-full">
                         <MapPin className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                        <div className="flex items-center gap-1 bg-green-100 text-[#2F34A2] px-2 py-0.5 rounded-full text-sm font-medium whitespace-nowrap">
-                          {fromCity}
-                          <button
-                            onClick={() => setFromCity("")}
-                            className="hover:text-red-500"
-                          >
-                            <X className="w-3 h-3" />
-                          </button>
-                        </div>
-                        {!fromCity && (
-                          <input
-                            className="outline-none text-gray-900 w-full"
-                            placeholder="From?"
-                            value={fromCity}
-                            onChange={(e) => setFromCity(e.target.value)}
-                          />
-                        )}
+                        <CityAutocomplete
+                          value={fromCity}
+                          onChange={setFromCity}
+                          placeholder="From?"
+                        />
                       </div>
                     </div>
                   </div>
@@ -349,12 +337,10 @@ const LandingPage: React.FC = () => {
                     <div className="md:col-span-3 relative">
                       <div className="flex items-center bg-white border-x-0 md:border-l-0 border-t-0 border-b md:border-y border-gray-300 p-3 h-14 hover:border-gray-400 hover:z-10 transition-colors cursor-text">
                         <MapPin className="w-5 h-5 text-gray-400 flex-shrink-0 mr-2" />
-                        <input
-                          type="text"
-                          placeholder="City, airport or place"
-                          className="w-full outline-none text-gray-900 placeholder-gray-500 font-medium"
+                        <CityAutocomplete
                           value={toCity}
-                          onChange={(e) => setToCity(e.target.value)}
+                          onChange={setToCity}
+                          placeholder="To?"
                         />
                       </div>
                     </div>
