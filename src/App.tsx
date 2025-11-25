@@ -7,8 +7,9 @@ import LandingPage from './pages/LandingPage';
 import MyTicketsPage from './pages/MyTicketsPage';
 import AboutPage from './pages/AboutPage';
 import { useAuthStore } from './store/useAuthStore';
+import MyTicketsPage from './pages/MyTicketsPage';
 
-const ProtectedRoute = ({ children }: { children?: React.ReactNode }) => {
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   
   if (!isAuthenticated) {
