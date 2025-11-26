@@ -1,13 +1,14 @@
 import React from "react";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
-import { ArrowRight, Target, Users, Globe2 } from "lucide-react";
+import { ArrowRight, Target, Users} from "lucide-react";
+import yasinImg from "../assets/yasin.jpeg"; 
 
 const teamMembers = [
   {
     name: "Yasin Kereci",
     role: "Founder & CEO",
-    image: "",
+    image: yasinImg,
   },
   {
     name: "Yavuz Özbay",
@@ -70,7 +71,7 @@ const AboutPage: React.FC = () => {
                   Global Reach
                 </h3>
                 <p className="text-gray-500">
-                  Connecting over 150 countries with a unified booking standard.
+                  Connecting over 40+ countries with a unified booking standard.
                 </p>
               </div>
               <div className="group">
@@ -93,7 +94,7 @@ const AboutPage: React.FC = () => {
               </div>
             </div>
             <div className="border-l border-[#2F34A2] pl-6">
-              <div className="text-5xl font-bold mb-2">150+</div>
+              <div className="text-5xl font-bold mb-2">40+</div>
               <div className="text-gray-400 text-sm tracking-widest uppercase">
                 Countries
               </div>
