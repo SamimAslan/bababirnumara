@@ -2,7 +2,7 @@ import React from "react";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
 import { ArrowRight, Target, Users} from "lucide-react";
-import yasinImg from "../assets/yasin.jpeg";
+import yasinImg from "../assets/yasin.jpeg"; 
 
 const teamMembers = [
   {
