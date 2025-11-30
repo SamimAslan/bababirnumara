@@ -11,38 +11,14 @@ import {
   MapPin,
   ArrowRight,
   Shield,
-  Zap,
-  Percent,
   Plus,
   Minus,
   User,
   Baby,
   Smile,
+  Gift,
+  Users,
 } from "lucide-react";
-
-const carouselSlides = [
-  {
-    title: "Rise above all travel anxieties",
-    subtitle: "The new NomadGo guarantee",
-    icon: <Shield className="w-24 h-24 text-white transform -rotate-45" />,
-    bgColor: "bg-[#409F68]",
-    textColor: "text-[#111827]",
-  },
-  {
-    title: "Lightning fast booking process",
-    subtitle: "Save time, travel more",
-    icon: <Zap className="w-24 h-24 text-white transform rotate-12" />,
-    bgColor: "bg-[#2F34A2]",
-    textColor: "text-[#111827]",
-  },
-  {
-    title: "Exclusive deals up to 40% off",
-    subtitle: "Member special offers",
-    icon: <Percent className="w-24 h-24 text-white" />,
-    bgColor: "bg-[#A22F2F]",
-    textColor: "text-[#111827]",
-  },
-];
 
 interface PassengerConfig {
   adults: number;
@@ -53,7 +29,6 @@ interface PassengerConfig {
 const LandingPage: React.FC = () => {
   const [fromCity, setFromCity] = useState("Zürich");
   const [toCity, setToCity] = useState("");
-  const [currentSlide, setCurrentSlide] = useState(0);
   const { convertPrice } = useCurrencyStore();
 
   const [departureDate, setDepartureDate] = useState("");
@@ -80,10 +55,6 @@ const LandingPage: React.FC = () => {
   const tripTypeDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % carouselSlides.length);
-    }, 2000);
-
     const handleClickOutside = (event: MouseEvent) => {
       if (
         passengerDropdownRef.current &&
@@ -102,7 +73,6 @@ const LandingPage: React.FC = () => {
     document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
-      clearInterval(timer);
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
@@ -420,7 +390,7 @@ const LandingPage: React.FC = () => {
                   <div className="md:col-span-2">
                     <button
                       onClick={handleExplore}
-                      className="w-full h-14 bg-[#409F68] hover:bg-[#368f5b] text-white font-bold rounded-b-lg md:rounded-r-lg md:rounded-bl-none flex items-center justify-center gap-2 transition-colors"
+                      className="w-full h-14 bg-[#2F34A2] hover:bg-[#262a85] text-white font-bold rounded-b-lg md:rounded-r-lg md:rounded-bl-none flex items-center justify-center gap-2 transition-colors"
                     >
                       Explore <ArrowRight className="w-5 h-5" />
                     </button>
@@ -461,69 +431,83 @@ const LandingPage: React.FC = () => {
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12 relative z-10 pb-16">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="rounded-2xl overflow-hidden bg-gradient-to-r from-purple-700 to-purple-500 shadow-lg text-white relative">
-              <div className="p-8 flex flex-col justify-between h-full relative z-10">
-                <div>
-                  <span className="text-xs font-bold uppercase tracking-wider bg-white/20 px-2 py-1 rounded inline-block mb-4">
-                    Refer a Friend
-                  </span>
-                  <h3 className="text-2xl font-bold mb-2">
-                    Invite friends to get up
-                    <br />
-                    to SFr. 500 in Credit
-                  </h3>
+            <div className="rounded-2xl overflow-hidden bg-gradient-to-br from-[#2F34A2] to-[#151963] shadow-2xl text-white relative group cursor-pointer">
+              <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-[#409F68] rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+              <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+              <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+
+              <div className="p-8 md:p-10 flex flex-col justify-between h-full relative z-10">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full border border-white/20 mb-6">
+                      <Gift className="w-3 h-3 text-[#409F68]" />
+                      <span className="text-xs font-bold uppercase tracking-widest text-blue-100">
+                        Referral Program
+                      </span>
+                    </div>
+
+                    <h3 className="text-3xl font-bold mb-2 leading-tight">
+                      Earn up to <br />
+                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#409F68] to-emerald-300 font-extrabold text-4xl">
+                        CHF 500
+                      </span>
+                    </h3>
+                    <p className="text-blue-200 mt-2 font-medium max-w-xs">
+                      Share the joy of travel. Give your friends a discount and
+                      earn travel credit.
+                    </p>
+                  </div>
+
+                  <div className="hidden sm:flex bg-white/10 rounded-full p-4 border border-white/10 shadow-inner">
+                    <Users className="w-8 h-8 text-white" />
+                  </div>
                 </div>
-                <div className="mt-8">
-                  <button className="bg-[#2f1c6a] hover:bg-[#1e1245] text-white font-bold py-2 px-6 rounded-lg transition-colors">
-                    Fly for free
+
+                <div className="mt-8 flex items-center gap-4">
+                  <button className="bg-white text-[#2F34A2] hover:bg-blue-50 font-bold py-3 px-8 rounded-xl shadow-lg transition-all flex items-center gap-2 group-hover:gap-3">
+                    Start Inviting <ArrowRight className="w-4 h-4" />
+                  </button>
+                  <span className="text-sm font-medium text-blue-200 underline cursor-pointer hover:text-white">
+                    Terms apply
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-2xl overflow-hidden bg-gradient-to-br from-white to-blue-50 shadow-lg border border-blue-100 relative group min-h-[220px]">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-[#2F34A2]/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+
+              <div className="p-8 md:p-10 flex flex-col justify-between h-full relative z-10">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="inline-flex items-center gap-2 bg-blue-100/50 px-3 py-1 rounded-full text-[#2F34A2] mb-4">
+                      <Shield className="w-4 h-4" />
+                      <span className="text-xs font-bold uppercase tracking-wider">
+                        The NomadGo Guarantee
+                      </span>
+                    </div>
+
+                    <h3 className="text-2xl font-bold text-[#111827] mb-2">
+                      Travel without <br />
+                      <span className="text-[#2F34A2]">uncertainty.</span>
+                    </h3>
+                    <p className="text-gray-600 mt-2 text-sm max-w-xs">
+                      Instant refunds, 24/7 global support, and price protection
+                      on every booking.
+                    </p>
+                  </div>
+
+                  <div className="hidden sm:flex bg-[#2F34A2] rounded-full p-4 shadow-xl shadow-blue-900/10 transform rotate-12 group-hover:rotate-0 transition-transform duration-500">
+                    <Shield className="w-8 h-8 text-white" />
+                  </div>
+                </div>
+
+                <div className="mt-6">
+                  <button className="text-[#2F34A2] font-bold text-sm flex items-center gap-2 group-hover:gap-3 transition-all">
+                    Learn about our promise <ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
               </div>
-              <div className="absolute right-0 bottom-0 opacity-20">
-                <div className="w-64 h-64 bg-yellow-300 rounded-full blur-3xl transform translate-x-10 translate-y-10"></div>
-              </div>
-            </div>
-            <div className="rounded-2xl overflow-hidden bg-white shadow-lg border border-gray-100 flex relative min-h-[220px]">
-              {carouselSlides.map((slide, index) => (
-                <div
-                  key={index}
-                  className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-                    index === currentSlide
-                      ? "opacity-100 z-10"
-                      : "opacity-0 z-0"
-                  }`}
-                >
-                  <div className="flex h-full w-full">
-                    <div className="p-8 flex flex-col justify-center w-2/3">
-                      <span className="text-[#409F68] font-bold text-sm mb-2">
-                        {slide.subtitle}
-                      </span>
-                      <h3 className="text-2xl font-bold text-[#111827] mb-4">
-                        {slide.title}
-                      </h3>
-                      <div className="flex gap-1 mt-2">
-                        {carouselSlides.map((_, dotIndex) => (
-                          <div
-                            key={dotIndex}
-                            className={`w-2 h-2 rounded-full transition-colors ${
-                              dotIndex === currentSlide
-                                ? "bg-[#409F68]"
-                                : "bg-gray-300"
-                            }`}
-                          ></div>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="absolute right-0 top-0 h-full w-1/3 bg-gray-100 flex items-center justify-center overflow-hidden">
-                      <div
-                        className={`${slide.bgColor} w-48 h-48 transform rotate-45 translate-x-10 flex items-center justify-center shadow-lg transition-colors duration-500`}
-                      >
-                        {slide.icon}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
             </div>
           </div>
         </div>
