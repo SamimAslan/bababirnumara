@@ -59,7 +59,7 @@ export const Navbar: React.FC = () => {
         <div className="flex justify-between h-24 items-center">
           <div className="flex items-center gap-4">
             <Link to="/" className="flex items-center">
-              <img src={logo} alt="NomadGo" className="h-16 w-auto md:h-20" />
+              <img src={logo} alt="NomadGo" className="h-8 w-auto md:h-10" />{" "}
             </Link>
 
             <div className="hidden md:flex items-center space-x-2 text-sm font-medium text-gray-600">
