@@ -13,6 +13,58 @@ interface CityAutocompleteProps {
   inputClassName?: string;
   wrapperClassName?: string;
 }
+const EUROPEAN_COUNTRY_CODES = [
+  "AL",
+  "AD",
+  "AT",
+  "BY",
+  "BE",
+  "BA",
+  "BG",
+  "HR",
+  "CY",
+  "CZ",
+  "DK",
+  "EE",
+  "FO",
+  "FI",
+  "FR",
+  "DE",
+  "GI",
+  "GR",
+  "HU",
+  "IS",
+  "IE",
+  "IM",
+  "IT",
+  "XK",
+  "LV",
+  "LI",
+  "LT",
+  "LU",
+  "MK",
+  "MT",
+  "MD",
+  "MC",
+  "ME",
+  "NL",
+  "NO",
+  "PL",
+  "PT",
+  "RO",
+  "RU",
+  "SM",
+  "RS",
+  "SK",
+  "SI",
+  "ES",
+  "SE",
+  "CH",
+  "TR",
+  "UA",
+  "GB",
+  "VA",
+];
 
 export const CityAutocomplete: React.FC<CityAutocompleteProps> = ({
   value,
@@ -29,7 +81,6 @@ export const CityAutocomplete: React.FC<CityAutocompleteProps> = ({
 
   useEffect(() => {
     if (!value) {
-      // Logic if needed when value is cleared externally
     }
   }, [value]);
 
@@ -57,7 +108,7 @@ export const CityAutocomplete: React.FC<CityAutocompleteProps> = ({
       try {
         const encodedQuery = encodeURIComponent(query);
         const response = await fetch(
-          `https://geocoding-api.open-meteo.com/v1/search?name=${encodedQuery}&count=5&language=en&format=json`
+          `https://geocoding-api.open-meteo.com/v1/search?name=${encodedQuery}&count=20&language=en&format=json`
         );
 
         if (!response.ok) {
@@ -65,10 +116,15 @@ export const CityAutocomplete: React.FC<CityAutocompleteProps> = ({
         }
 
         const data = await response.json();
-        const mappedCities: City[] = (data.results || []).map((item: any) => ({
-          name: item.name,
-          country: item.country,
-        }));
+        const europeanCities = (data.results || []).filter((item: any) =>
+          EUROPEAN_COUNTRY_CODES.includes(item.country_code)
+        );
+        const mappedCities: City[] = europeanCities
+          .slice(0, 5)
+          .map((item: any) => ({
+            name: item.name,
+            country: item.country,
+          }));
 
         setSuggestions(mappedCities);
         setIsOpen(true);
