@@ -5,6 +5,7 @@ import { NomadModal } from "../components/NomadModal";
 import { useCurrencyStore } from "../store/useCurrencyStore";
 import { CityAutocomplete } from "../components/CityAutoComplete";
 import type { NomadFormState } from "../types";
+import { useNavigate } from "react-router-dom";
 import {
   ChevronDown,
   Calendar,
@@ -30,11 +31,18 @@ const LandingPage: React.FC = () => {
   const [fromCity, setFromCity] = useState("Zürich");
   const [toCity, setToCity] = useState("");
   const { convertPrice } = useCurrencyStore();
+  const navigate = useNavigate();
 
   const [departureDate, setDepartureDate] = useState("");
   const [returnDate, setReturnDate] = useState("");
   const [tripType, setTripType] = useState("Return");
   const [isTripTypeOpen, setIsTripTypeOpen] = useState(false);
+
+  // Validation State
+  const [errors, setErrors] = useState<{
+    departure?: boolean;
+    return?: boolean;
+  }>({});
 
   const [isPassengerOpen, setIsPassengerOpen] = useState(false);
   const [passengers, setPassengers] = useState<PassengerConfig>({
@@ -99,13 +107,59 @@ const LandingPage: React.FC = () => {
     });
   };
 
+  const validateSearch = () => {
+    const newErrors: { departure?: boolean; return?: boolean } = {};
+    let isValid = true;
+
+    if (!departureDate) {
+      newErrors.departure = true;
+      isValid = false;
+    }
+
+    if (tripType === "Return" && !returnDate) {
+      newErrors.return = true;
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
   const handleExplore = () => {
+    if (!validateSearch()) return;
+
     if (tripType === "Nomad") {
       setIsNomadModalOpen(true);
       setNomadForm((prev) => ({ ...prev, endCity: fromCity }));
     } else {
-      console.log("Searching...");
+      console.log("Searching standard flights...");
+      // Logic for standard flight search could go here
     }
+  };
+
+  const handleNomadSearch = (form: NomadFormState) => {
+    navigate("/nomad-results", {
+      state: {
+        fromCity,
+        dest1: form.dest1,
+        dest2: form.dest2,
+        endCity: form.isReturnDifferent ? form.endCity : fromCity,
+        isReturnDifferent: form.isReturnDifferent,
+        startDate: departureDate, // Pass the selected date
+      },
+    });
+  };
+
+  // Fixed images for popular destinations
+  const destinationImages: Record<string, string> = {
+    London:
+      "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=800&q=80",
+    Paris:
+      "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=800&q=80",
+    Berlin:
+      "https://images.unsplash.com/photo-1560969184-10fe8719e047?auto=format&fit=crop&w=800&q=80",
+    Barcelona:
+      "https://images.unsplash.com/photo-1583422409516-2895a77efded?auto=format&fit=crop&w=800&q=80",
   };
 
   return (
@@ -317,12 +371,21 @@ const LandingPage: React.FC = () => {
                   )}
 
                   <div className="md:col-span-2 relative">
-                    <div className="flex items-center bg-white border border-gray-300 md:border-l-0 border-b-0 md:border-b p-3 h-14 hover:border-gray-400 hover:z-10 transition-colors cursor-pointer relative">
+                    <div
+                      className={`flex items-center bg-white border ${
+                        errors.departure
+                          ? "border-[#A22F2F]"
+                          : "border-gray-300"
+                      } md:border-l-0 border-b-0 md:border-b p-3 h-14 hover:border-gray-400 hover:z-10 transition-colors cursor-pointer relative`}
+                    >
                       <input
                         type="date"
                         className="absolute inset-0 opacity-0 z-10 cursor-pointer w-full h-full"
                         value={departureDate}
-                        onChange={(e) => setDepartureDate(e.target.value)}
+                        onChange={(e) => {
+                          setDepartureDate(e.target.value);
+                          setErrors({ ...errors, departure: false });
+                        }}
                         onClick={(e) => {
                           try {
                             if ("showPicker" in HTMLInputElement.prototype) {
@@ -331,10 +394,20 @@ const LandingPage: React.FC = () => {
                           } catch (err) {}
                         }}
                       />
-                      <Calendar className="w-5 h-5 text-gray-400 flex-shrink-0 mr-2" />
+                      <Calendar
+                        className={`w-5 h-5 flex-shrink-0 mr-2 ${
+                          errors.departure ? "text-[#A22F2F]" : "text-gray-400"
+                        }`}
+                      />
                       <div className="flex flex-col justify-center">
-                        <span className="text-xs text-gray-500 font-medium">
-                          Departure
+                        <span
+                          className={`text-xs font-medium ${
+                            errors.departure
+                              ? "text-[#A22F2F]"
+                              : "text-gray-500"
+                          }`}
+                        >
+                          Departure {errors.departure && "*"}
                         </span>
                         <span
                           className={`text-sm font-bold ${
@@ -348,13 +421,20 @@ const LandingPage: React.FC = () => {
                   </div>
 
                   <div className="md:col-span-2 relative">
-                    <div className="flex items-center bg-white border border-gray-300 md:border-l-0 border-b md:border-r-0 p-3 h-14 hover:border-gray-400 hover:z-10 transition-colors cursor-pointer relative">
+                    <div
+                      className={`flex items-center bg-white border ${
+                        errors.return ? "border-[#A22F2F]" : "border-gray-300"
+                      } md:border-l-0 border-b md:border-r-0 p-3 h-14 hover:border-gray-400 hover:z-10 transition-colors cursor-pointer relative`}
+                    >
                       {tripType !== "One-way" && (
                         <input
                           type="date"
                           className="absolute inset-0 opacity-0 z-10 cursor-pointer w-full h-full"
                           value={returnDate}
-                          onChange={(e) => setReturnDate(e.target.value)}
+                          onChange={(e) => {
+                            setReturnDate(e.target.value);
+                            setErrors({ ...errors, return: false });
+                          }}
                           min={departureDate}
                           onClick={(e) => {
                             try {
@@ -365,10 +445,18 @@ const LandingPage: React.FC = () => {
                           }}
                         />
                       )}
-                      <Calendar className="w-5 h-5 text-gray-400 flex-shrink-0 mr-2" />
+                      <Calendar
+                        className={`w-5 h-5 flex-shrink-0 mr-2 ${
+                          errors.return ? "text-[#A22F2F]" : "text-gray-400"
+                        }`}
+                      />
                       <div className="flex flex-col justify-center">
-                        <span className="text-xs text-gray-500 font-medium">
-                          Return
+                        <span
+                          className={`text-xs font-medium ${
+                            errors.return ? "text-[#A22F2F]" : "text-gray-500"
+                          }`}
+                        >
+                          Return {errors.return && "*"}
                         </span>
                         <span
                           className={`text-sm font-bold ${
@@ -429,6 +517,7 @@ const LandingPage: React.FC = () => {
           </div>
         </div>
 
+        {/* Marketing Cards */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12 relative z-10 pb-16">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="rounded-2xl overflow-hidden bg-gradient-to-br from-[#2F34A2] to-[#151963] shadow-2xl text-white relative group cursor-pointer">
@@ -536,7 +625,7 @@ const LandingPage: React.FC = () => {
                     className={`absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10`}
                   />
                   <img
-                    src={`https://source.unsplash.com/800x600/?${dest.city}`}
+                    src={destinationImages[dest.city]}
                     alt={dest.city}
                     className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
                     onError={(e) => {
@@ -571,6 +660,7 @@ const LandingPage: React.FC = () => {
         form={nomadForm}
         setForm={setNomadForm}
         fromCity={fromCity}
+        onSearch={handleNomadSearch}
       />
     </div>
   );

@@ -1,6 +1,5 @@
 import React from "react";
 import { X } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import type { NomadFormState } from "../types";
 import { CityAutocomplete } from "./CityAutoComplete";
 
@@ -10,6 +9,7 @@ interface NomadModalProps {
   form: NomadFormState;
   setForm: (form: NomadFormState) => void;
   fromCity: string;
+  onSearch?: (form: NomadFormState) => void;
 }
 
 export const NomadModal: React.FC<NomadModalProps> = ({
@@ -17,10 +17,8 @@ export const NomadModal: React.FC<NomadModalProps> = ({
   onClose,
   form,
   setForm,
-  fromCity,
+  onSearch,
 }) => {
-  const navigate = useNavigate();
-
   if (!isOpen) return null;
 
   const isValid = form.dest1.trim().length > 0 && form.dest2.trim().length > 0;
@@ -28,15 +26,9 @@ export const NomadModal: React.FC<NomadModalProps> = ({
   const handleSearch = () => {
     if (!isValid) return;
     onClose();
-    navigate("/nomad-results", {
-      state: {
-        fromCity,
-        dest1: form.dest1,
-        dest2: form.dest2,
-        endCity: form.isReturnDifferent ? form.endCity : fromCity,
-        isReturnDifferent: form.isReturnDifferent,
-      },
-    });
+    if (onSearch) {
+      onSearch(form);
+    }
   };
 
   return (
@@ -137,7 +129,7 @@ export const NomadModal: React.FC<NomadModalProps> = ({
               disabled={!isValid}
               className={`px-6 py-3 font-bold rounded-lg transition-colors ${
                 isValid
-                  ? "bg-[#409F68] text-white hover:bg-[#368f5b]"
+                  ? "bg-[#2F34A2] text-white hover:bg-[#262a85]"
                   : "bg-gray-200 text-gray-400 cursor-not-allowed"
               }`}
             >
