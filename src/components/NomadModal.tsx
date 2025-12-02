@@ -1,5 +1,6 @@
 import React from "react";
 import { X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import type { NomadFormState } from "../types";
 import { CityAutocomplete } from "./CityAutoComplete";
 
@@ -18,7 +19,25 @@ export const NomadModal: React.FC<NomadModalProps> = ({
   setForm,
   fromCity,
 }) => {
+  const navigate = useNavigate();
+
   if (!isOpen) return null;
+
+  const isValid = form.dest1.trim().length > 0 && form.dest2.trim().length > 0;
+
+  const handleSearch = () => {
+    if (!isValid) return;
+    onClose();
+    navigate("/nomad-results", {
+      state: {
+        fromCity,
+        dest1: form.dest1,
+        dest2: form.dest2,
+        endCity: form.isReturnDifferent ? form.endCity : fromCity,
+        isReturnDifferent: form.isReturnDifferent,
+      },
+    });
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/60 backdrop-blur-sm">
@@ -45,7 +64,7 @@ export const NomadModal: React.FC<NomadModalProps> = ({
               <CityAutocomplete
                 value={form.dest1}
                 onChange={(v) => setForm({ ...form, dest1: v })}
-                placeholder="First destination"
+                placeholder="First destination (Required)"
                 wrapperClassName="w-full relative"
                 inputClassName="w-full bg-transparent outline-none font-medium placeholder-gray-400"
               />
@@ -55,7 +74,7 @@ export const NomadModal: React.FC<NomadModalProps> = ({
               <CityAutocomplete
                 value={form.dest2}
                 onChange={(v) => setForm({ ...form, dest2: v })}
-                placeholder="Second destination"
+                placeholder="Second destination (Required)"
                 wrapperClassName="w-full relative"
                 inputClassName="w-full bg-transparent outline-none font-medium placeholder-gray-400"
               />
@@ -114,10 +133,13 @@ export const NomadModal: React.FC<NomadModalProps> = ({
               Cancel
             </button>
             <button
-              onClick={() => {
-                onClose();
-              }}
-              className="px-6 py-3 bg-[#a2dfd6] text-[#006c5b] font-bold rounded-lg hover:bg-[#8fdad0] transition-colors"
+              onClick={handleSearch}
+              disabled={!isValid}
+              className={`px-6 py-3 font-bold rounded-lg transition-colors ${
+                isValid
+                  ? "bg-[#409F68] text-white hover:bg-[#368f5b]"
+                  : "bg-gray-200 text-gray-400 cursor-not-allowed"
+              }`}
             >
               Search journeys
             </button>

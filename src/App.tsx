@@ -8,6 +8,7 @@ import MyTicketsPage from './pages/MyTicketsPage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import HelpPage from './pages/HelpPage';
+import NomadResultsPage from './pages/NomadResultsPage';
 import { useAuthStore } from './store/useAuthStore';
 
 const ProtectedRoute = ({ children }: { children?: React.ReactNode }) => {
@@ -31,6 +32,7 @@ const App: React.FC = () => {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/help" element={<HelpPage />} />
+        <Route path="/nomad-results" element={<NomadResultsPage />} />
         <Route 
           path="/dashboard" 
           element={
