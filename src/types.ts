@@ -27,3 +27,11 @@ export interface NomadFormState {
   isReturnDifferent: boolean;
   endCity: string;
 }
+
+export interface NomadSearchState {
+  fromCity: string;
+  dest1: string;
+  dest2: string;
+  endCity: string;
+  isReturnDifferent: boolean;
+}
