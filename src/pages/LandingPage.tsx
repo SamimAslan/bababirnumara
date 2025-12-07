@@ -107,10 +107,6 @@ const LandingPage: React.FC = () => {
       newErrors.departure = true;
       isValid = false;
     }
-
-    // Nomad mode doesn't strictly require return date for initial search validation
-    // unless enforced, but we keep the logic flexible.
-
     setErrors(newErrors);
     return isValid;
   };
@@ -300,7 +296,6 @@ const LandingPage: React.FC = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-1 md:gap-0 bg-gray-100/50 p-1 md:bg-transparent rounded-lg md:rounded-none">
-                  {/* From City - Full width for Nomad */}
                   <div className="md:col-span-6 relative group">
                     <div className="flex items-center bg-white border border-gray-300 rounded-t-lg md:rounded-l-lg p-3 h-14 hover:border-gray-400 transition-colors cursor-text">
                       <div className="flex items-center gap-2 w-full">
