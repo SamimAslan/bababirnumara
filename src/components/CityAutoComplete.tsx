@@ -64,6 +64,10 @@ const EUROPEAN_COUNTRY_CODES = [
   "UA",
   "GB",
   "VA",
+  "AX",
+  "GG",
+  "JE",
+  "SJ",
 ];
 
 export const CityAutocomplete: React.FC<CityAutocompleteProps> = ({
@@ -80,8 +84,6 @@ export const CityAutocomplete: React.FC<CityAutocompleteProps> = ({
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!value) {
-    }
   }, [value]);
 
   useEffect(() => {
@@ -108,7 +110,7 @@ export const CityAutocomplete: React.FC<CityAutocompleteProps> = ({
       try {
         const encodedQuery = encodeURIComponent(query);
         const response = await fetch(
-          `https://geocoding-api.open-meteo.com/v1/search?name=${encodedQuery}&count=20&language=en&format=json`
+          `https://geocoding-api.open-meteo.com/v1/search?name=${encodedQuery}&count=100&language=en&format=json`
         );
 
         if (!response.ok) {
@@ -116,8 +118,13 @@ export const CityAutocomplete: React.FC<CityAutocompleteProps> = ({
         }
 
         const data = await response.json();
-        const europeanCities = (data.results || []).filter((item: any) =>
-          EUROPEAN_COUNTRY_CODES.includes(item.country_code)
+
+        // Strictly filter results to only include European countries
+        // Ensure country_code exists and normalize to uppercase for comparison
+        const europeanCities = (data.results || []).filter(
+          (item: any) =>
+            item.country_code &&
+            EUROPEAN_COUNTRY_CODES.includes(item.country_code.toUpperCase())
         );
         const mappedCities: City[] = europeanCities
           .slice(0, 5)

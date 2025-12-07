@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import Map, { Source, Layer } from "react-map-gl";
+import Map, { Source, Layer, type MapRef } from "react-map-gl";
 import { Navbar } from "../components/Navbar";
 import {
   ArrowRight,
@@ -16,7 +16,7 @@ import {
   Smile,
 } from "lucide-react";
 import { useCurrencyStore } from "../store/useCurrencyStore";
-import type { NomadSearchState } from "../types";
+import type { NomadSearchState, PassengerConfig } from "../types";
 
 const MAPBOX_TOKEN =
   "pk.eyJ1Ijoic2FtaW1hc2xhbiIsImEiOiJjbWd0b3lrMWswNmU4MmlyMXNiZWZoODBhIn0.5EzekljQe-2FzlekVqdBbg";
@@ -43,12 +43,6 @@ interface Itinerary {
   id: string;
   segments: FlightSegment[];
   totalPrice: number;
-}
-
-interface PassengerConfig {
-  adults: number;
-  children: number;
-  infants: number;
 }
 
 const AirlineLogo: React.FC<{ name: string }> = ({ name }) => {
@@ -104,16 +98,20 @@ const NomadResultsPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { convertPrice } = useCurrencyStore();
+  const mapRef = useRef<MapRef>(null);
 
   const [isPassengerOpen, setIsPassengerOpen] = useState(false);
-  const [passengers, setPassengers] = useState<PassengerConfig>({
-    adults: 1,
-    children: 0,
-    infants: 0,
-  });
   const passengerDropdownRef = useRef<HTMLDivElement>(null);
 
   const state = location.state as NomadSearchState;
+
+  const [passengers, setPassengers] = useState<PassengerConfig>(
+    state?.passengers || {
+      adults: 1,
+      children: 0,
+      infants: 0,
+    }
+  );
 
   const origin = state?.fromCity || "Zürich";
   const dest1 = state?.dest1 || "London";
@@ -124,6 +122,9 @@ const NomadResultsPage: React.FC = () => {
 
   const [coords, setCoords] = useState<Record<string, Coordinates>>({});
   const [itineraries, setItineraries] = useState<Itinerary[]>([]);
+  const [selectedItinerary, setSelectedItinerary] = useState<Itinerary | null>(
+    null
+  );
   const [loadingMap, setLoadingMap] = useState(true);
 
   useEffect(() => {
@@ -267,13 +268,19 @@ const NomadResultsPage: React.FC = () => {
           "Ryanair",
         ];
 
-        const generateItinerary = (id: string, priceMod: number) => {
-          const generateSegment = (
-            from: string,
-            to: string,
-            daysOffset: number,
-            idx: number
-          ): FlightSegment => {
+        const generateRoute = (
+          pathCities: string[],
+          priceMod: number,
+          id: string
+        ) => {
+          const segments: FlightSegment[] = [];
+          let total = 0;
+
+          for (let i = 0; i < pathCities.length - 1; i++) {
+            const from = pathCities[i];
+            const to = pathCities[i + 1];
+            const daysOffset = i * 3;
+
             const flightDate = new Date(baseDate);
             flightDate.setDate(flightDate.getDate() + daysOffset);
 
@@ -283,9 +290,9 @@ const NomadResultsPage: React.FC = () => {
               newCoords[to],
               priceMod + randomPriceVar
             );
+
             const randomAirline =
               airlines[Math.floor(Math.random() * airlines.length)];
-
             const depHour = 6 + Math.floor(Math.random() * 14);
             const depMin = Math.floor(Math.random() * 60);
             const depTime = `${depHour.toString().padStart(2, "0")}:${depMin
@@ -302,7 +309,7 @@ const NomadResultsPage: React.FC = () => {
               .toString()
               .padStart(2, "0")}`;
 
-            return {
+            segments.push({
               from,
               to,
               date: flightDate.toLocaleDateString("en-GB", {
@@ -313,37 +320,39 @@ const NomadResultsPage: React.FC = () => {
               duration: data.duration,
               price: data.price,
               airline: randomAirline,
-              flightNumber: `NG-${100 + idx + Math.floor(Math.random() * 900)}`,
+              flightNumber: `NG-${
+                100 +
+                parseInt(id.split("-")[1]) +
+                i +
+                Math.floor(Math.random() * 900)
+              }`,
               departureTime: depTime,
               arrivalTime: arrTime,
-            };
-          };
+            });
 
-          const segs = [
-            generateSegment(origin, dest1, 0, 1),
-            generateSegment(dest1, dest2, 3, 2),
-            generateSegment(dest2, finalDest, 7, 3),
-          ];
-
-          const total = segs.reduce((acc, curr) => acc + curr.price, 0);
+            total += data.price;
+          }
 
           return {
             id,
-            segments: segs,
+            segments,
             totalPrice: total,
           };
         };
+        const path1 = [origin, dest1, dest2, finalDest];
+        const path2 = [origin, dest2, dest1, finalDest];
 
         const generatedItineraries = [
-          generateItinerary("opt-1", -30),
-          generateItinerary("opt-2", -10),
-          generateItinerary("opt-3", 10),
-          generateItinerary("opt-4", 30),
-          generateItinerary("opt-5", 60),
+          generateRoute(path1, -40, "opt-1"),
+          generateRoute(path2, -35, "opt-2"),
+          generateRoute(path1, -10, "opt-3"),
+          generateRoute(path2, 10, "opt-4"),
+          generateRoute(path1, 40, "opt-5"),
         ];
 
         generatedItineraries.sort((a, b) => a.totalPrice - b.totalPrice);
         setItineraries(generatedItineraries);
+        setSelectedItinerary(generatedItineraries[0]);
       }
 
       setLoadingMap(false);
@@ -353,12 +362,17 @@ const NomadResultsPage: React.FC = () => {
   }, [origin, dest1, dest2, finalDest, startDateStr]);
 
   const flightPathGeoJSON = useMemo(() => {
-    const points = [];
-    if (coords[origin]) points.push([coords[origin].lng, coords[origin].lat]);
-    if (coords[dest1]) points.push([coords[dest1].lng, coords[dest1].lat]);
-    if (coords[dest2]) points.push([coords[dest2].lng, coords[dest2].lat]);
-    if (coords[finalDest])
-      points.push([coords[finalDest].lng, coords[finalDest].lat]);
+    if (!selectedItinerary) return null;
+
+    const points: number[][] = [];
+
+    selectedItinerary.segments.forEach((seg, i) => {
+      if (i === 0) {
+        if (coords[seg.from])
+          points.push([coords[seg.from].lng, coords[seg.from].lat]);
+      }
+      if (coords[seg.to]) points.push([coords[seg.to].lng, coords[seg.to].lat]);
+    });
 
     return {
       type: "Feature",
@@ -368,7 +382,55 @@ const NomadResultsPage: React.FC = () => {
         coordinates: points,
       },
     };
-  }, [coords, origin, dest1, dest2, finalDest]);
+  }, [coords, selectedItinerary]);
+
+  const stopsGeoJSON = useMemo(() => {
+    if (!selectedItinerary) return null;
+
+    const features = [];
+    const locationCounts: Record<string, number> = {};
+
+    const getOffsetCoords = (lng: number, lat: number) => {
+      const key = `${lng.toFixed(4)},${lat.toFixed(4)}`;
+      const count = locationCounts[key] || 0;
+      locationCounts[key] = count + 1;
+
+      if (count > 0) {
+        const offsetAmount = 0.5;
+        const direction = count % 2 === 0 ? -1 : 1;
+        return [lng + offsetAmount * Math.ceil(count / 2) * direction, lat];
+      }
+      return [lng, lat];
+    };
+
+    const firstSeg = selectedItinerary.segments[0];
+    if (coords[firstSeg.from]) {
+      const c = coords[firstSeg.from];
+      const [lng, lat] = getOffsetCoords(c.lng, c.lat);
+      features.push({
+        type: "Feature",
+        geometry: { type: "Point", coordinates: [lng, lat] },
+        properties: { label: "1" },
+      });
+    }
+
+    selectedItinerary.segments.forEach((seg, i) => {
+      if (coords[seg.to]) {
+        const c = coords[seg.to];
+        const [lng, lat] = getOffsetCoords(c.lng, c.lat);
+        features.push({
+          type: "Feature",
+          geometry: { type: "Point", coordinates: [lng, lat] },
+          properties: { label: String(i + 2) },
+        });
+      }
+    });
+
+    return {
+      type: "FeatureCollection",
+      features,
+    };
+  }, [coords, selectedItinerary]);
 
   const initialViewState = useMemo(() => {
     const allCoords = Object.values(coords);
@@ -543,7 +605,12 @@ const NomadResultsPage: React.FC = () => {
             {itineraries.map((itinerary, index) => (
               <div
                 key={itinerary.id}
-                className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group"
+                onClick={() => setSelectedItinerary(itinerary)}
+                className={`bg-white border rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group cursor-pointer ${
+                  selectedItinerary?.id === itinerary.id
+                    ? "border-[#2F34A2] ring-1 ring-[#2F34A2]"
+                    : "border-gray-200"
+                }`}
               >
                 <div className="p-5 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
                   <div>
@@ -617,23 +684,57 @@ const NomadResultsPage: React.FC = () => {
             </div>
           ) : (
             <Map
+              ref={mapRef}
               initialViewState={initialViewState}
               style={{ width: "100%", height: "100%" }}
               mapStyle="mapbox://styles/mapbox/light-v11"
               mapboxAccessToken={MAPBOX_TOKEN}
               projection={{ name: "mercator" }}
             >
-              <Source id="route" type="geojson" data={flightPathGeoJSON as any}>
-                <Layer
-                  id="route-line"
-                  type="line"
-                  paint={{
-                    "line-color": "#2F34A2",
-                    "line-width": 3,
-                    "line-dasharray": [2, 1],
-                  }}
-                />
-              </Source>
+              {flightPathGeoJSON && (
+                <Source
+                  id="route"
+                  type="geojson"
+                  data={flightPathGeoJSON as any}
+                >
+                  <Layer
+                    id="route-line"
+                    type="line"
+                    paint={{
+                      "line-color": "#2F34A2",
+                      "line-width": 3,
+                      "line-dasharray": [2, 1],
+                    }}
+                  />
+                </Source>
+              )}
+              {stopsGeoJSON && (
+                <Source id="stops" type="geojson" data={stopsGeoJSON as any}>
+                  <Layer
+                    id="stops-circle"
+                    type="circle"
+                    paint={{
+                      "circle-radius": 12,
+                      "circle-color": "#2F34A2",
+                      "circle-stroke-width": 2,
+                      "circle-stroke-color": "#ffffff",
+                    }}
+                  />
+                  <Layer
+                    id="stops-label"
+                    type="symbol"
+                    layout={{
+                      "text-field": ["get", "label"],
+                      "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
+                      "text-size": 12,
+                      "text-allow-overlap": true,
+                    }}
+                    paint={{
+                      "text-color": "#ffffff",
+                    }}
+                  />
+                </Source>
+              )}
             </Map>
           )}
         </div>
