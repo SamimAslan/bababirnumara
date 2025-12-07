@@ -1,3 +1,4 @@
+
 export interface User {
   id: string;
   email: string;
@@ -28,6 +29,12 @@ export interface NomadFormState {
   endCity: string;
 }
 
+export interface PassengerConfig {
+  adults: number;
+  children: number;
+  infants: number;
+}
+
 export interface NomadSearchState {
   fromCity: string;
   dest1: string;
@@ -35,5 +42,6 @@ export interface NomadSearchState {
   endCity: string;
   isReturnDifferent: boolean;
   startDate: string;
-  returnDate: string;
+  returnDate?: string;
+  passengers: PassengerConfig;
 }

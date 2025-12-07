@@ -4,7 +4,7 @@ import { Footer } from "../components/Footer";
 import { NomadModal } from "../components/NomadModal";
 import { useCurrencyStore } from "../store/useCurrencyStore";
 import { CityAutocomplete } from "../components/CityAutoComplete";
-import type { NomadFormState } from "../types";
+import type { NomadFormState, PassengerConfig } from "../types";
 import { useNavigate } from "react-router-dom";
 import {
   ChevronDown,
@@ -20,12 +20,6 @@ import {
   Gift,
   Users,
 } from "lucide-react";
-
-interface PassengerConfig {
-  adults: number;
-  children: number;
-  infants: number;
-}
 
 const LandingPage: React.FC = () => {
   const [fromCity, setFromCity] = useState("Zürich");
@@ -130,6 +124,7 @@ const LandingPage: React.FC = () => {
         isReturnDifferent: form.isReturnDifferent,
         startDate: departureDate,
         returnDate: returnDate,
+        passengers: passengers,
       },
     });
   };
