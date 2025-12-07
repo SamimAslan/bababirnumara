@@ -34,10 +34,8 @@ const LandingPage: React.FC = () => {
 
   const [departureDate, setDepartureDate] = useState("");
   const [returnDate, setReturnDate] = useState("");
-  // Fixed to Nomad mode
   const [tripType] = useState("Nomad");
 
-  // Validation State
   const [errors, setErrors] = useState<{
     departure?: boolean;
     return?: boolean;
@@ -130,13 +128,11 @@ const LandingPage: React.FC = () => {
         dest2: form.dest2,
         endCity: form.isReturnDifferent ? form.endCity : fromCity,
         isReturnDifferent: form.isReturnDifferent,
-        startDate: departureDate, // Pass the selected date
+        startDate: departureDate,
         returnDate: returnDate,
       },
     });
   };
-
-  // Fixed images for popular destinations
   const destinationImages: Record<string, string> = {
     London:
       "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=800&q=80",
