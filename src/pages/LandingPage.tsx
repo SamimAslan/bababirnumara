@@ -34,10 +34,8 @@ const LandingPage: React.FC = () => {
 
   const [departureDate, setDepartureDate] = useState("");
   const [returnDate, setReturnDate] = useState("");
-  // Fixed to Nomad mode
   const [tripType] = useState("Nomad");
 
-  // Validation State
   const [errors, setErrors] = useState<{
     departure?: boolean;
     return?: boolean;
@@ -107,10 +105,6 @@ const LandingPage: React.FC = () => {
       newErrors.departure = true;
       isValid = false;
     }
-
-    // Nomad mode doesn't strictly require return date for initial search validation
-    // unless enforced, but we keep the logic flexible.
-
     setErrors(newErrors);
     return isValid;
   };
@@ -134,13 +128,11 @@ const LandingPage: React.FC = () => {
         dest2: form.dest2,
         endCity: form.isReturnDifferent ? form.endCity : fromCity,
         isReturnDifferent: form.isReturnDifferent,
-        startDate: departureDate, // Pass the selected date
+        startDate: departureDate,
         returnDate: returnDate,
       },
     });
   };
-
-  // Fixed images for popular destinations
   const destinationImages: Record<string, string> = {
     London:
       "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=800&q=80",
@@ -300,7 +292,6 @@ const LandingPage: React.FC = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-1 md:gap-0 bg-gray-100/50 p-1 md:bg-transparent rounded-lg md:rounded-none">
-                  {/* From City - Full width for Nomad */}
                   <div className="md:col-span-6 relative group">
                     <div className="flex items-center bg-white border border-gray-300 rounded-t-lg md:rounded-l-lg p-3 h-14 hover:border-gray-400 transition-colors cursor-text">
                       <div className="flex items-center gap-2 w-full">
