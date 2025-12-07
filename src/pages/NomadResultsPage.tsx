@@ -119,6 +119,7 @@ const NomadResultsPage: React.FC = () => {
   const finalDest = state?.endCity || origin;
   const startDateStr =
     state?.startDate || new Date().toISOString().split("T")[0];
+  const returnDateStr = state?.returnDate;
 
   const [coords, setCoords] = useState<Record<string, Coordinates>>({});
   const [itineraries, setItineraries] = useState<Itinerary[]>([]);
@@ -267,7 +268,6 @@ const NomadResultsPage: React.FC = () => {
           "Iberia",
           "Ryanair",
         ];
-
         const generateRoute = (
           pathCities: string[],
           priceMod: number,
@@ -276,10 +276,26 @@ const NomadResultsPage: React.FC = () => {
           const segments: FlightSegment[] = [];
           let total = 0;
 
-          for (let i = 0; i < pathCities.length - 1; i++) {
+          const totalSegments = pathCities.length - 1;
+          let daysInterval = 3; 
+          if (returnDateStr) {
+            const retDate = new Date(returnDateStr);
+            const timeDiff = retDate.getTime() - baseDate.getTime();
+            const totalTripDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+            if (totalTripDays > 0 && totalSegments > 1) {
+              daysInterval = totalTripDays / (totalSegments - 1);
+            } else if (totalSegments === 1) {
+              daysInterval = totalTripDays;
+              daysInterval = 0;
+            }
+          }
+
+          for (let i = 0; i < totalSegments; i++) {
             const from = pathCities[i];
             const to = pathCities[i + 1];
-            const daysOffset = i * 3;
+
+            const daysOffset = Math.round(i * daysInterval);
 
             const flightDate = new Date(baseDate);
             flightDate.setDate(flightDate.getDate() + daysOffset);
@@ -339,14 +355,15 @@ const NomadResultsPage: React.FC = () => {
             totalPrice: total,
           };
         };
+
         const path1 = [origin, dest1, dest2, finalDest];
         const path2 = [origin, dest2, dest1, finalDest];
 
         const generatedItineraries = [
           generateRoute(path1, -40, "opt-1"),
           generateRoute(path2, -35, "opt-2"),
-          generateRoute(path1, -10, "opt-3"),
-          generateRoute(path2, 10, "opt-4"),
+          generateRoute(path1, -10, "opt-3"), 
+          generateRoute(path2, 10, "opt-4"), 
           generateRoute(path1, 40, "opt-5"),
         ];
 
@@ -359,7 +376,7 @@ const NomadResultsPage: React.FC = () => {
     };
 
     loadData();
-  }, [origin, dest1, dest2, finalDest, startDateStr]);
+  }, [origin, dest1, dest2, finalDest, startDateStr, returnDateStr]);
 
   const flightPathGeoJSON = useMemo(() => {
     if (!selectedItinerary) return null;
@@ -384,6 +401,7 @@ const NomadResultsPage: React.FC = () => {
     };
   }, [coords, selectedItinerary]);
 
+  // Handle numbered stops with overlap offset
   const stopsGeoJSON = useMemo(() => {
     if (!selectedItinerary) return null;
 
@@ -414,6 +432,7 @@ const NomadResultsPage: React.FC = () => {
       });
     }
 
+    // Add subsequent points
     selectedItinerary.segments.forEach((seg, i) => {
       if (coords[seg.to]) {
         const c = coords[seg.to];
