@@ -35,4 +35,5 @@ export interface NomadSearchState {
   endCity: string;
   isReturnDifferent: boolean;
   startDate: string;
+  returnDate: string;
 }
