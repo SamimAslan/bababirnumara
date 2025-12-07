@@ -26,7 +26,14 @@ export const useCurrencyStore = create<CurrencyState>((set, get) => ({
   },
   convertPrice: (amountInCHF: number) => {
     const { currency, rates } = get();
-    if (Object.keys(rates).length === 0) return `CHF ${amountInCHF}`;
+    if (Object.keys(rates).length === 0) {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'CHF',
+        maximumFractionDigits: 0,
+        minimumFractionDigits: 0,
+      }).format(amountInCHF);
+    }
     const rateCHF = rates['CHF'] || 1;
     const rateTarget = rates[currency] || 1;
     
@@ -35,7 +42,8 @@ export const useCurrencyStore = create<CurrencyState>((set, get) => ({
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: currency,
-      maximumFractionDigits: 0
+      maximumFractionDigits: 0,
+      minimumFractionDigits: 0,
     }).format(convertedAmount);
   }
 }));
