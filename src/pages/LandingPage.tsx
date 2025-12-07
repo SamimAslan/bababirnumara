@@ -29,14 +29,13 @@ interface PassengerConfig {
 
 const LandingPage: React.FC = () => {
   const [fromCity, setFromCity] = useState("Zürich");
-  const [toCity, setToCity] = useState("");
   const { convertPrice } = useCurrencyStore();
   const navigate = useNavigate();
 
   const [departureDate, setDepartureDate] = useState("");
   const [returnDate, setReturnDate] = useState("");
-  const [tripType, setTripType] = useState("Return");
-  const [isTripTypeOpen, setIsTripTypeOpen] = useState(false);
+  // Fixed to Nomad mode
+  const [tripType] = useState("Nomad");
 
   // Validation State
   const [errors, setErrors] = useState<{
@@ -60,7 +59,6 @@ const LandingPage: React.FC = () => {
   });
 
   const passengerDropdownRef = useRef<HTMLDivElement>(null);
-  const tripTypeDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -69,12 +67,6 @@ const LandingPage: React.FC = () => {
         !passengerDropdownRef.current.contains(event.target as Node)
       ) {
         setIsPassengerOpen(false);
-      }
-      if (
-        tripTypeDropdownRef.current &&
-        !tripTypeDropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsTripTypeOpen(false);
       }
     };
 
@@ -116,10 +108,8 @@ const LandingPage: React.FC = () => {
       isValid = false;
     }
 
-    if (tripType === "Return" && !returnDate) {
-      newErrors.return = true;
-      isValid = false;
-    }
+    // Nomad mode doesn't strictly require return date for initial search validation
+    // unless enforced, but we keep the logic flexible.
 
     setErrors(newErrors);
     return isValid;
@@ -133,7 +123,6 @@ const LandingPage: React.FC = () => {
       setNomadForm((prev) => ({ ...prev, endCity: fromCity }));
     } else {
       console.log("Searching standard flights...");
-      // Logic for standard flight search could go here
     }
   };
 
@@ -146,6 +135,7 @@ const LandingPage: React.FC = () => {
         endCity: form.isReturnDifferent ? form.endCity : fromCity,
         isReturnDifferent: form.isReturnDifferent,
         startDate: departureDate, // Pass the selected date
+        returnDate: returnDate,
       },
     });
   };
@@ -175,34 +165,8 @@ const LandingPage: React.FC = () => {
             <div className="bg-white rounded-xl shadow-xl p-1 max-w-5xl mx-auto relative z-20">
               <div className="p-4 space-y-4">
                 <div className="flex flex-wrap gap-2 md:gap-4 mb-2">
-                  <div className="relative" ref={tripTypeDropdownRef}>
-                    <button
-                      onClick={() => setIsTripTypeOpen(!isTripTypeOpen)}
-                      className="flex items-center gap-1 px-3 py-1.5 hover:bg-gray-100 rounded text-sm font-medium text-gray-700 transition-colors"
-                    >
-                      {tripType}{" "}
-                      <ChevronDown className="w-4 h-4 text-gray-400" />
-                    </button>
-                    {isTripTypeOpen && (
-                      <div className="absolute top-full left-0 mt-1 w-32 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50">
-                        {["Return", "One-way", "Nomad"].map((type) => (
-                          <button
-                            key={type}
-                            onClick={() => {
-                              setTripType(type);
-                              setIsTripTypeOpen(false);
-                            }}
-                            className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${
-                              tripType === type
-                                ? "text-[#2F34A2] font-semibold"
-                                : "text-gray-700"
-                            }`}
-                          >
-                            {type}
-                          </button>
-                        ))}
-                      </div>
-                    )}
+                  <div className="flex items-center px-3 py-1.5 text-sm font-bold text-gray-900">
+                    Nomad
                   </div>
 
                   <div className="relative" ref={passengerDropdownRef}>
@@ -336,16 +300,9 @@ const LandingPage: React.FC = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-1 md:gap-0 bg-gray-100/50 p-1 md:bg-transparent rounded-lg md:rounded-none">
-                  <div
-                    className={`${
-                      tripType === "Nomad" ? "md:col-span-6" : "md:col-span-3"
-                    } relative group`}
-                  >
-                    <div
-                      className={`flex items-center bg-white border border-gray-300 rounded-t-lg md:rounded-l-lg ${
-                        tripType === "Nomad" ? "" : "md:rounded-tr-none"
-                      } p-3 h-14 hover:border-gray-400 transition-colors cursor-text`}
-                    >
+                  {/* From City - Full width for Nomad */}
+                  <div className="md:col-span-6 relative group">
+                    <div className="flex items-center bg-white border border-gray-300 rounded-t-lg md:rounded-l-lg p-3 h-14 hover:border-gray-400 transition-colors cursor-text">
                       <div className="flex items-center gap-2 w-full">
                         <MapPin className="w-5 h-5 text-gray-400 flex-shrink-0" />
                         <CityAutocomplete
@@ -356,19 +313,6 @@ const LandingPage: React.FC = () => {
                       </div>
                     </div>
                   </div>
-
-                  {tripType !== "Nomad" && (
-                    <div className="md:col-span-3 relative">
-                      <div className="flex items-center bg-white border-x-0 md:border-l-0 border-t-0 border-b md:border-y border-gray-300 p-3 h-14 hover:border-gray-400 hover:z-10 transition-colors cursor-text">
-                        <MapPin className="w-5 h-5 text-gray-400 flex-shrink-0 mr-2" />
-                        <CityAutocomplete
-                          value={toCity}
-                          onChange={setToCity}
-                          placeholder="To?"
-                        />
-                      </div>
-                    </div>
-                  )}
 
                   <div className="md:col-span-2 relative">
                     <div
@@ -426,25 +370,23 @@ const LandingPage: React.FC = () => {
                         errors.return ? "border-[#A22F2F]" : "border-gray-300"
                       } md:border-l-0 border-b md:border-r-0 p-3 h-14 hover:border-gray-400 hover:z-10 transition-colors cursor-pointer relative`}
                     >
-                      {tripType !== "One-way" && (
-                        <input
-                          type="date"
-                          className="absolute inset-0 opacity-0 z-10 cursor-pointer w-full h-full"
-                          value={returnDate}
-                          onChange={(e) => {
-                            setReturnDate(e.target.value);
-                            setErrors({ ...errors, return: false });
-                          }}
-                          min={departureDate}
-                          onClick={(e) => {
-                            try {
-                              if ("showPicker" in HTMLInputElement.prototype) {
-                                e.currentTarget.showPicker();
-                              }
-                            } catch (err) {}
-                          }}
-                        />
-                      )}
+                      <input
+                        type="date"
+                        className="absolute inset-0 opacity-0 z-10 cursor-pointer w-full h-full"
+                        value={returnDate}
+                        onChange={(e) => {
+                          setReturnDate(e.target.value);
+                          setErrors({ ...errors, return: false });
+                        }}
+                        min={departureDate}
+                        onClick={(e) => {
+                          try {
+                            if ("showPicker" in HTMLInputElement.prototype) {
+                              e.currentTarget.showPicker();
+                            }
+                          } catch (err) {}
+                        }}
+                      />
                       <Calendar
                         className={`w-5 h-5 flex-shrink-0 mr-2 ${
                           errors.return ? "text-[#A22F2F]" : "text-gray-400"
@@ -458,18 +400,8 @@ const LandingPage: React.FC = () => {
                         >
                           Return {errors.return && "*"}
                         </span>
-                        <span
-                          className={`text-sm font-bold ${
-                            returnDate
-                              ? "text-[#111827]"
-                              : tripType === "One-way"
-                              ? "text-gray-400"
-                              : "text-gray-900"
-                          }`}
-                        >
-                          {tripType === "One-way"
-                            ? "No Return"
-                            : formatDate(returnDate)}
+                        <span className="text-sm font-bold text-gray-900">
+                          {formatDate(returnDate)}
                         </span>
                       </div>
                     </div>
