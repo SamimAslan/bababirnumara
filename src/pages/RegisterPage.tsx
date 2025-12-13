@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
+import { registerUser } from '../services/api';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { Compass, Globe, Check } from 'lucide-react';
@@ -13,37 +14,43 @@ const RegisterPage: React.FC = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
-  const register = useAuthStore((state) => state.register);
+  const setAuth = useAuthStore((state) => state.setAuth);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    if (!name || !email || !password || !confirmPassword) {
+      setError('Please fill in all fields.');
+      return;
+    }
+    
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters.');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
+
     setIsLoading(true);
 
-    setTimeout(() => {
-      if (!name || !email || !password || !confirmPassword) {
-        setError('Please fill in all fields.');
-        setIsLoading(false);
-        return;
-      }
-      
-      if (password.length < 6) {
-        setError('Password must be at least 6 characters.');
-        setIsLoading(false);
-        return;
-      }
-
-      if (password !== confirmPassword) {
-        setError('Passwords do not match.');
-        setIsLoading(false);
-        return;
-      }
-
-      register(email, name);
-      setIsLoading(false);
+    try {
+      const response = await registerUser({ name, email, password });
+      setAuth(response.user, response.token);
       navigate('/dashboard');
-    }, 1000);
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Registration failed. Please try again.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -118,7 +125,7 @@ const RegisterPage: React.FC = () => {
           
           <div className="mt-6 text-center text-sm text-gray-500">
             Already have an account?{' '}
-            <Link to="/" className="font-medium text-[#2F34A2] hover:text-[#262a85]">
+            <Link to="/login" className="font-medium text-[#2F34A2] hover:text-[#262a85]">
               Sign In
             </Link>
           </div>
