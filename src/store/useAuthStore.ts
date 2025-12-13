@@ -1,33 +1,43 @@
 import { create } from 'zustand';
-import type { AuthState } from '../types';
+import { persist } from 'zustand/middleware';
 
-export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  isAuthenticated: false,
-  login: (email: string) => {
-    set({
-      isAuthenticated: true,
-      user: {
-        id: '1',
-        email: email,
-        name: 'Nomad User',
-      },
-    });
-  },
-  register: (email: string, name: string) => {
-    set({
-      isAuthenticated: true,
-      user: {
-        id: Date.now().toString(),
-        email: email,
-        name: name,
-      },
-    });
-  },
-  logout: () => {
-    set({
-      isAuthenticated: false,
+interface User {
+  id: string;
+  email: string;
+  name: string;
+}
+
+interface AuthState {
+  user: User | null;
+  token: string | null;
+  isAuthenticated: boolean;
+  setAuth: (user: User, token: string) => void;
+  logout: () => void;
+}
+
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
       user: null,
-    });
-  },
-}));
+      token: null,
+      isAuthenticated: false,
+      setAuth: (user: User, token: string) => {
+        set({
+          user,
+          token,
+          isAuthenticated: true,
+        });
+      },
+      logout: () => {
+        set({
+          user: null,
+          token: null,
+          isAuthenticated: false,
+        });
+      },
+    }),
+    {
+      name: 'nomadgo-auth',
+    }
+  )
+);
