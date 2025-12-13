@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
+import { loginUser } from '../services/api';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { Compass, Globe, Check } from 'lucide-react';
@@ -11,31 +12,38 @@ const LoginPage: React.FC = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
-  const login = useAuthStore((state) => state.login);
+  const setAuth = useAuthStore((state) => state.setAuth);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    if (!email || !password) {
+      setError('Please fill in all fields.');
+      return;
+    }
+    
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters.');
+      return;
+    }
+
     setIsLoading(true);
 
-    setTimeout(() => {
-      if (!email || !password) {
-        setError('Please fill in all fields.');
-        setIsLoading(false);
-        return;
-      }
-      
-      if (password.length < 6) {
-        setError('Password must be at least 6 characters.');
-        setIsLoading(false);
-        return;
-      }
-
-      login(email);
-      setIsLoading(false);
+    try {
+      const response = await loginUser({ email, password });
+      setAuth(response.user, response.token);
       navigate('/dashboard');
-    }, 1000);
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Login failed. Please try again.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
